@@ -1,6 +1,6 @@
 import Phaser from "phaser";
-import { createLoadingProgressReporter, installInputGuards } from "@yes2sdk/js";
-import { createPhaserLifecycle } from "@yes2sdk/js/phaser";
+import { createLoadingProgressReporter, installInputGuards } from "@yes2games/js";
+import { createPhaserLifecycle } from "@yes2games/js/phaser";
 import { BootScene, GameScene } from "./scenes";
 import { loadSdk } from "./sdk";
 import { services, setServices } from "./services";

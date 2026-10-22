@@ -6,8 +6,8 @@
  */
 
 import * as THREE from "three";
-import { createLoadingProgressReporter, installInputGuards } from "@yes2sdk/js";
-import { createThreeLifecycle } from "@yes2sdk/js/three";
+import { createLoadingProgressReporter, installInputGuards } from "@yes2games/js";
+import { createThreeLifecycle } from "@yes2games/js/three";
 import { loadSdk } from "./sdk";
 
 const COINS_KEY = "coins";

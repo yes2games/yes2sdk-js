@@ -10,7 +10,7 @@ npm run build     # production build in dist/ (no mock, relative paths)
 runs. The template adds no SDK `<script>` tags of its own. Its `<canvas>` carries
 `data-yes2-canvas`: mark your game canvas so the dashboard captures the right one.
 
-`createThreeLifecycle({ listener, onPauseChange })` from `@yes2sdk/js/three` exposes `lifecycle.paused` (the render loop skips frames while it is true), mutes the `AudioListener`, and resumes its AudioContext after every ad.
+`createThreeLifecycle({ listener, onPauseChange })` from `@yes2games/js/three` exposes `lifecycle.paused` (the render loop skips frames while it is true), mutes the `AudioListener`, and resumes its AudioContext after every ad.
 
 The flow: `initializeAsync`, loader progress through `createLoadingProgressReporter` (integer
 changes only), `startGameAsync` once playable, explicit `gameplayStart`/`gameplayStop`, an
@@ -26,5 +26,5 @@ platforms require.
 
 ## Using this template outside the yes2sdk-js repo
 
-Change `"@yes2sdk/js": "file:../.."` in `package.json` to the published version of
-`@yes2sdk/js`.
+Change `"@yes2games/js": "file:../.."` in `package.json` to the published version of
+`@yes2games/js`.

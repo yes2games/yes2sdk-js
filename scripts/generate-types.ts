@@ -241,7 +241,7 @@ const ROOT_DOC = `/**
  *
  * @remarks
  * Games never bundle the real SDK. Write against this interface, use the
- * \`@yes2sdk/js\` mock during local development, and upload a plain build to the
+ * \`@yes2games/js\` mock during local development, and upload a plain build to the
  * Yes2Games Dashboard, which injects the real SDK for each target platform.
  *
  * @example

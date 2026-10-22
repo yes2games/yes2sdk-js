@@ -22,7 +22,7 @@ await Yes2SDK.initializeAsync();
 
 // 2. Report loading progress while you load assets. The reporter forwards only
 //    integer changes to Yes2SDK.setLoadingProgress, however often your loader fires.
-const progress = createLoadingProgressReporter();   // from "@yes2sdk/js"
+const progress = createLoadingProgressReporter();   // from "@yes2games/js"
 loader.onProgress = (fraction) => progress.fraction(fraction);
 
 // 3. Tell the platform the game is ready, but only once it is actually playable.
@@ -46,7 +46,7 @@ directly. The runtime adds the one-ad-at-a-time latch and the watchdog; see
 rewards **only** in `adViewed`.
 
 ```ts
-import { ads } from "@yes2sdk/js";
+import { ads } from "@yes2games/js";
 
 await ads.showInterstitial("level-complete", {
     beforeAd: () => game.pause(),
@@ -70,7 +70,7 @@ What the SDK guarantees:
   comes first.
 
 You still have to pause your own game loop and audio. `createGameLifecycle()`,
-`@yes2sdk/js/phaser` and `@yes2sdk/js/three` do it for you, including the SDK's
+`@yes2games/js/phaser` and `@yes2games/js/three` do it for you, including the SDK's
 pause/resume events and resuming the AudioContext after every ad.
 
 ## Platform pause, resume and mute
@@ -114,7 +114,7 @@ The SDK throws, or rejects with, plain objects (`Yes2SDKError`), **not** `Error`
 instances. Branch on `code`:
 
 ```ts
-import type { Yes2SDKError } from "@yes2sdk/js";
+import type { Yes2SDKError } from "@yes2games/js";
 
 try {
     await Yes2SDK.iap.purchaseAsync({ productId: "gems_100" });
@@ -133,7 +133,7 @@ try {
    from a sub-path, so root-absolute URLs fail. The Vite templates set `base: "./"`.
 4. Do not add SDK `<script>` tags or files; the dashboard injects them. (The mock tag in the
    vanilla-js template is fine: the dashboard removes it and deletes `yes2sdk-mock.js`.) Your
-   own copy of `@yes2sdk/js`, bundled or as `yes2-runtime.js`, belongs in the zip.
+   own copy of `@yes2games/js`, bundled or as `yes2-runtime.js`, belongs in the zip.
 5. Add `data-yes2-canvas` to your game's `<canvas>`: mark your game canvas so the dashboard
    captures the right one. Without it, the dashboard falls back to `#unity-canvas`, then the
    largest visible canvas.

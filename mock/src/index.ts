@@ -1,10 +1,10 @@
 /**
- * `@yes2sdk/js/mock`: a local-development stand-in for `window.Yes2SDK`.
+ * `@yes2games/js/mock`: a local-development stand-in for `window.Yes2SDK`.
  *
  * @example
  * ```ts
  * if (import.meta.env.DEV) {
- *     const { installYes2SDKMock } = await import("@yes2sdk/js/mock");
+ *     const { installYes2SDKMock } = await import("@yes2games/js/mock");
  *     installYes2SDKMock({ adResult: "nofill" });
  * }
  * ```

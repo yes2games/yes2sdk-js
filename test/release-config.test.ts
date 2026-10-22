@@ -30,7 +30,7 @@ describe("verify-release-config", () => {
     });
 
     it("rejects the stuck state: a component key with componentless tags", () => {
-        const bad = { ...good, packages: { ".": { ...good.packages["."], "package-name": "@yes2sdk/js" } } };
+        const bad = { ...good, packages: { ".": { ...good.packages["."], "package-name": "@yes2games/js" } } };
         expect(verifyReleaseConfig(fixture(bad, "0.0.0", "0.1.0")).join("\n")).toMatch(/package-name is set/);
     });
 

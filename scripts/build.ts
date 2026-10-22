@@ -48,7 +48,7 @@ async function buildRuntime(): Promise<void> {
         format: "esm",
         target: "es2020",
         chunkNames: "chunks/[name]-[hash]",
-        banner: { js: "/* @yes2sdk/js runtime. MIT License. Does not contain the Yes2SDK. */" },
+        banner: { js: "/* @yes2games/js runtime. MIT License. Does not contain the Yes2SDK. */" },
         logLevel: "warning",
     });
     await build({
@@ -57,7 +57,7 @@ async function buildRuntime(): Promise<void> {
         bundle: true,
         format: "iife",
         target: "es2017",
-        banner: { js: "/* @yes2sdk/js runtime (window.Yes2Runtime). MIT License. Does not contain the Yes2SDK. */" },
+        banner: { js: "/* @yes2games/js runtime (window.Yes2Runtime). MIT License. Does not contain the Yes2SDK. */" },
         logLevel: "warning",
     });
     tsc("tsconfig.runtime.json");
@@ -72,7 +72,7 @@ async function buildMock(): Promise<void> {
     const shared = {
         bundle: true,
         define: { __YES2SDK_MOCK_VERSION__: JSON.stringify(version) },
-        banner: { js: `/* @yes2sdk/js mock ${version}: local development only. MIT License. */` },
+        banner: { js: `/* @yes2games/js mock ${version}: local development only. MIT License. */` },
         logLevel: "warning" as const,
     };
     await build({ ...shared, entryPoints: [join(ROOT, "mock", "src", "iife.ts")], outfile: join(out, "yes2sdk-mock.js"), format: "iife", target: "es2017" });

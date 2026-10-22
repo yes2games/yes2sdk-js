@@ -9,8 +9,8 @@
       "DOM.Iterable"
     ],
     "types": [
-      "@yes2sdk/js",
-      "@yes2sdk/js/global"
+      "@yes2games/js",
+      "@yes2games/js/global"
     ],
     "allowJs": true,
     "checkJs": true,

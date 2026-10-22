@@ -8,7 +8,7 @@
 /**
  * The Yes2SDK runtime, available as `window.Yes2SDK` (or bare `Yes2SDK`).
  *
- * @remarks Games never bundle the real SDK. Write against this interface, use the `@yes2sdk/js`
+ * @remarks Games never bundle the real SDK. Write against this interface, use the `@yes2games/js`
  * mock during local development, and upload a plain build to the Yes2Games Dashboard, which injects
  * the real SDK for each target platform.
  *

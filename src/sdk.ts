@@ -61,7 +61,7 @@ export function requireSdk(): Yes2SDK {
     if (sdk === undefined) {
         throw new Error(
             "window.Yes2SDK is missing. Upload this build to the Yes2Games Dashboard, which injects the SDK, " +
-                "or install the @yes2sdk/js mock for local development."
+                "or install the @yes2games/js mock for local development."
         );
     }
     return sdk;

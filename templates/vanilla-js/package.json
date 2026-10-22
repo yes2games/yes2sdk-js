@@ -1,5 +1,5 @@
 {
-  "name": "@yes2sdk/template-vanilla-js",
+  "name": "@yes2games/template-vanilla-js",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,7 +8,7 @@
     "typecheck": "tsc -p jsconfig.json"
   },
   "devDependencies": {
-    "@yes2sdk/js": "file:../..",
+    "@yes2games/js": "file:../..",
     "typescript": "6.0.3",
     "vite": "8.3.5"
   }

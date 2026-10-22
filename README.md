@@ -1,4 +1,4 @@
-# @yes2sdk/js
+# @yes2games/js
 
 The JavaScript/TypeScript wrapper for **`window.Yes2SDK`**, the Yes2Games runtime that handles
 ads, saves, player data and platform lifecycle on every platform Yes2Games publishes to.
@@ -17,11 +17,11 @@ This package does **not** contain the SDK. You never bundle the SDK yourself:
 
 | Path | What it is |
 | --- | --- |
-| `src/` → `@yes2sdk/js` | The **runtime layer** you bundle with your game: a one-ad-at-a-time latch with a watchdog, support checks that never throw, de-duplicated loading progress, pause/mute helpers, and input guards. It has no platform logic. See [docs/runtime.md](docs/runtime.md). |
-| `@yes2sdk/js/phaser`, `@yes2sdk/js/three` | Engine helpers: pause and mute around ads and platform events, and resume the AudioContext after every ad. |
+| `src/` → `@yes2games/js` | The **runtime layer** you bundle with your game: a one-ad-at-a-time latch with a watchdog, support checks that never throw, de-duplicated loading progress, pause/mute helpers, and input guards. It has no platform logic. See [docs/runtime.md](docs/runtime.md). |
+| `@yes2games/js/phaser`, `@yes2games/js/three` | Engine helpers: pause and mute around ads and platform events, and resume the AudioContext after every ad. |
 | `dist/yes2-runtime.js` | The same runtime as a classic `<script>` (`window.Yes2Runtime`), for games without a bundler. |
 | `types/yes2sdk.d.ts` | The public SDK API: the `Yes2SDK` interface, every type it uses, and the `window.Yes2SDK` / `Yes2SDK` globals. It is generated from Core, then committed. |
-| `mock/` → `@yes2sdk/js/mock` | The local-development mock. See [docs/mock.md](docs/mock.md). |
+| `mock/` → `@yes2games/js/mock` | The local-development mock. See [docs/mock.md](docs/mock.md). |
 | `templates/` | `vanilla-js` (no build step), `vanilla-ts`, `phaser-ts` and `threejs-ts`, all on Vite. |
 | `docs/` | [Getting started](docs/getting-started.md), [runtime](docs/runtime.md), [mock](docs/mock.md), [maintaining the types](docs/maintaining-types.md), [E2E tests](docs/e2e.md). |
 
@@ -44,10 +44,10 @@ npm run build -w templates/phaser-ts
 ## In a game
 
 ```ts
-import { ads, createGameLifecycle, createLoadingProgressReporter, requireSdk } from "@yes2sdk/js";
+import { ads, createGameLifecycle, createLoadingProgressReporter, requireSdk } from "@yes2games/js";
 
 if (import.meta.env.DEV) {
-    (await import("@yes2sdk/js/mock")).installYes2SDKMock();   // local only
+    (await import("@yes2games/js/mock")).installYes2SDKMock();   // local only
 }
 const sdk = requireSdk();
 await sdk.initializeAsync();
@@ -65,7 +65,7 @@ if (outcome === "viewed") player.addLife();
 ```
 
 TypeScript users get the `window.Yes2SDK` / `Yes2SDK` global types by importing
-`@yes2sdk/js`, or with `"types": ["@yes2sdk/js"]` in `tsconfig.json`.
+`@yes2games/js`, or with `"types": ["@yes2games/js"]` in `tsconfig.json`.
 
 ## How the mock stays out of real builds
 

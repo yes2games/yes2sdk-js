@@ -1,5 +1,5 @@
 /**
- * `@yes2sdk/js`: the runtime layer games bundle themselves.
+ * `@yes2games/js`: the runtime layer games bundle themselves.
  *
  * It wraps the injected `window.Yes2SDK` (it never contains the SDK, nor any
  * platform logic) and adds what the Unity and Defold wrappers add: a one-ad-at-a-time

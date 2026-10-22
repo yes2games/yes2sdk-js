@@ -1,4 +1,4 @@
-# The runtime layer (`@yes2sdk/js`)
+# The runtime layer (`@yes2games/js`)
 
 A thin layer you bundle with your game. It wraps the injected `window.Yes2SDK` and adds
 what the Unity and Defold wrappers add. It contains no platform logic. Everything the SDK
@@ -9,7 +9,7 @@ prefixing and flushing) is left to the SDK.
 ## Ads: `ads.showInterstitial` / `ads.showRewarded`
 
 ```ts
-import { ads } from "@yes2sdk/js";
+import { ads } from "@yes2games/js";
 
 const outcome = await ads.showRewarded("extra-life", {
     beforeAd: pause,
@@ -53,11 +53,11 @@ await lifecycle.showInterstitial("level-complete");
   `session.isAudioEnabled()`).
 - Resumes the AudioContext after every ad, from `afterAd` and again when the show promise
   settles.
-- `@yes2sdk/js/phaser`: `createPhaserLifecycle(game)` uses `game.pause()`/`resume()`,
+- `@yes2games/js/phaser`: `createPhaserLifecycle(game)` uses `game.pause()`/`resume()`,
   `game.sound.mute` and `game.sound.context`. It follows your own mute choice through the sound
   manager's `"mute"` event and restores that afterwards. It never reads `sound.mute` back,
   because that getter lags behind writes while the AudioContext is suspended.
-- `@yes2sdk/js/three`: `createThreeLifecycle({ listener, onPauseChange })` exposes
+- `@yes2games/js/three`: `createThreeLifecycle({ listener, onPauseChange })` exposes
   `lifecycle.paused` for your render loop, mutes the `AudioListener` and resumes its context. It
   wraps `listener.setMasterVolume` to follow the volume you set, because three's volume ramps
   and `getMasterVolume()` lags. A volume you set while the game is muted applies when it
