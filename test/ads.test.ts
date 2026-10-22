@@ -250,6 +250,32 @@ describe("SDK failures", () => {
         await expect(done).resolves.toBe("noFill");
     });
 
+    it("afterAd with no beforeAd and no outcome (Core's blocked interstitial) is a noFill: noFill then afterAd", async () => {
+        const { calls, runtime, events, record } = setup();
+        const interstitial = runtime.showInterstitial("p", record("i"));
+        calls[0]!.cb.afterAd?.(); // Core's guard settles a failed interstitial with afterAd alone
+        calls[0]!.reject({ code: "ADS_BLOCKED", message: "blocked" });
+        await expect(interstitial).resolves.toBe("noFill");
+        const rewarded = runtime.showRewarded("p", record("r"));
+        calls[1]!.cb.afterAd?.();
+        await expect(rewarded).resolves.toBe("noFill");
+        expect(events).toEqual(["i:noFill", "i:afterAd", "r:noFill", "r:afterAd"]);
+    });
+
+    it("a retry from inside that noFill still gets the first ad's afterAd before it starts", () => {
+        const { calls, runtime, events, record } = setup();
+        void runtime.showInterstitial("p", {
+            ...record("a"),
+            noFill: () => {
+                events.push("a:noFill");
+                void runtime.showInterstitial("retry", record("b"));
+            },
+        });
+        calls[0]!.cb.afterAd?.();
+        calls[1]!.cb.beforeAd?.();
+        expect(events).toEqual(["a:noFill", "a:afterAd", "b:beforeAd"]);
+    });
+
     it("a rejection after the SDK already settled (blocked / error) adds nothing", async () => {
         const { calls, runtime, events, record, clock } = setup();
         const done = runtime.showInterstitial("p", record("a"));

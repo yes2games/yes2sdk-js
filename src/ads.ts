@@ -306,6 +306,20 @@ export class AdRuntime {
 
     private onAfterAd(request: AdRequest): void {
         if (this.release(request)) {
+            if (!request.started && request.outcome === null) {
+                // No beforeAd and no outcome: the ad never showed. Core settles a failed
+                // interstitial (blocked, error) with afterAd alone, so this is the game's only
+                // sign of it. Report noFill first, as for every other ad that never started,
+                // and keep the retry-inside-noFill ordering: this afterAd lands before a retry.
+                this.logger.warn(`afterAd for ad ${request.id} came without beforeAd or an outcome; reporting noFill first.`);
+                request.awaitingAfter = true;
+                this.awaiting = request;
+                this.deliverOutcome(request, "noFill", "noFill");
+                if (!request.afterDone) {
+                    this.deliverAfterAd(request);
+                }
+                return;
+            }
             this.deliverAfterAd(request);
         } else if (request.awaitingAfter && !request.afterDone) {
             this.deliverAfterAd(request);
