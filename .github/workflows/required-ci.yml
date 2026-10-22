@@ -1,6 +1,6 @@
 name: YES2 JS Required CI Workflow
 
-# The required CI for @yes2sdk/js, and its only release authority: Release Please runs in this
+# The required CI for @yes2games/js, and its only release authority: Release Please runs in this
 # same workflow run, on push to main, behind an ordinary `needs:` edge on the final gate, so it
 # only ever acts on a commit that just passed every mandatory job. Modelled on Core's and
 # Unity's required-ci.yml, at the scale of this repo.
@@ -228,7 +228,7 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  # Publishes @yes2sdk/js to npm when Release Please has just created a release, from the
+  # Publishes @yes2games/js to npm when Release Please has just created a release, from the
   # tagged commit, with provenance. Auth prefers npm trusted publishing (OIDC, no stored
   # secret; configure it on npmjs.com for this repo and workflow file). Trusted publishing
   # can only be configured once the package exists, so the very first publish uses the

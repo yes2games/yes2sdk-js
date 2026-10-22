@@ -1,6 +1,6 @@
 /** Shared handles the scenes use; filled in by main.ts before the game boots. */
 
-import type { GameLifecycle, LoadingProgressReporter, Yes2SDK } from "@yes2sdk/js";
+import type { GameLifecycle, LoadingProgressReporter, Yes2SDK } from "@yes2games/js";
 
 export interface Services {
     sdk: Yes2SDK;

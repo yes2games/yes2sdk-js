@@ -1,5 +1,5 @@
 {
-  "name": "@yes2sdk/template-phaser-ts",
+  "name": "@yes2games/template-phaser-ts",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -13,7 +13,7 @@
     "phaser": "3.90.0"
   },
   "devDependencies": {
-    "@yes2sdk/js": "file:../..",
+    "@yes2games/js": "file:../..",
     "typescript": "6.0.3",
     "vite": "8.3.5"
   }

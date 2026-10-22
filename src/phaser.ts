@@ -1,5 +1,5 @@
 /**
- * `@yes2sdk/js/phaser`: pause/mute a Phaser 3 game around ads and platform events.
+ * `@yes2games/js/phaser`: pause/mute a Phaser 3 game around ads and platform events.
  *
  * - `beforeAd` and the SDK's `pause` event: `game.pause()` and `game.sound.mute = true`.
  * - `afterAd` and `resume`: `game.resume()` and the game's own mute choice. While the helper

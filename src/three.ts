@@ -1,5 +1,5 @@
 /**
- * `@yes2sdk/js/three`: pause/mute a three.js game around ads and platform events.
+ * `@yes2games/js/three`: pause/mute a three.js game around ads and platform events.
  *
  * three.js has no game loop of its own, so the helper exposes a pause flag
  * (`lifecycle.paused`) for your render loop to check, plus an optional

@@ -12,7 +12,7 @@ Every call logs a line prefixed `[Yes2SDK] Mock:`.
 
 | Context | How |
 | --- | --- |
-| Bundler (Vite etc.) | `if (import.meta.env.DEV) { (await import("@yes2sdk/js/mock")).installYes2SDKMock(options) }` |
+| Bundler (Vite etc.) | `if (import.meta.env.DEV) { (await import("@yes2games/js/mock")).installYes2SDKMock(options) }` |
 | Plain `<script>` | `<script src="yes2sdk-mock.js"></script>` before your game scripts. Options go in `window.__yes2sdkMockOptions = {...}`, set before the tag. |
 | Unit tests | `createYes2SDKMock(options)` returns an instance without touching `window`. |
 

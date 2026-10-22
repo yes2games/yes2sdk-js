@@ -1,5 +1,5 @@
 /**
- * Minimal Yes2SDK flow with the @yes2sdk/js runtime:
+ * Minimal Yes2SDK flow with the @yes2games/js runtime:
  *   initializeAsync -> loading progress (integer changes only) -> startGameAsync once playable
  *   gameplayStart / gameplayStop around actual play
  *   interstitial between levels, rewarded for a bonus (one ad at a time, watchdog-protected)
@@ -14,7 +14,7 @@ import {
     installInputGuards,
     installSdkRejectionHandler,
     type Yes2SDK,
-} from "@yes2sdk/js";
+} from "@yes2games/js";
 import { loadSdk } from "./sdk";
 
 const COINS_KEY = "coins";

@@ -1,5 +1,5 @@
 {
-  "name": "@yes2sdk/template-threejs-ts",
+  "name": "@yes2games/template-threejs-ts",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
   },
   "devDependencies": {
     "@types/three": "0.186.0",
-    "@yes2sdk/js": "file:../..",
+    "@yes2games/js": "file:../..",
     "typescript": "6.0.3",
     "vite": "8.3.5"
   }

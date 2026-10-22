@@ -1,7 +1,7 @@
 // @ts-check
 /**
  * Minimal Yes2SDK flow, plain JavaScript, no build step, using the
- * @yes2sdk/js runtime (window.Yes2Runtime):
+ * @yes2games/js runtime (window.Yes2Runtime):
  *   initializeAsync -> loading progress (integer changes only) -> startGameAsync once playable
  *   gameplayStart / gameplayStop around actual play
  *   interstitial between levels, rewarded for a bonus (one ad at a time, watchdog-protected)
