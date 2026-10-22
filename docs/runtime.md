@@ -30,6 +30,7 @@ or `"noFill"`.
 | Isolated callbacks | Each of your callbacks runs in its own try/catch. A throw is logged as `[Yes2SDK] <name> callback threw:` with the stack, and the next callback still runs. The latch is released before your `afterAd`/`noFill` runs, so you can chain another ad from there. |
 | No fill | `noFill` then `afterAd`, the same as Core and Defold. |
 | SDK call failed | If the SDK rejects without calling back (for example, before `initializeAsync`), you get `noFill` then `afterAd` on the following frames. If it rejects after settling the ad (blocked or error), nothing extra is delivered. |
+| Ad that never showed | `afterAd` with no `beforeAd` and no outcome means the ad never appeared; Core settles a blocked or failed interstitial that way. You get `noFill` then `afterAd`, and the promise resolves `"noFill"`, not `"shown"`. |
 
 ### Support checks
 
@@ -53,9 +54,14 @@ await lifecycle.showInterstitial("level-complete");
 - Resumes the AudioContext after every ad, from `afterAd` and again when the show promise
   settles.
 - `@yes2sdk/js/phaser`: `createPhaserLifecycle(game)` uses `game.pause()`/`resume()`,
-  `game.sound.mute` and `game.sound.context`.
+  `game.sound.mute` and `game.sound.context`. It follows your own mute choice through the sound
+  manager's `"mute"` event and restores that afterwards. It never reads `sound.mute` back,
+  because that getter lags behind writes while the AudioContext is suspended.
 - `@yes2sdk/js/three`: `createThreeLifecycle({ listener, onPauseChange })` exposes
-  `lifecycle.paused` for your render loop, mutes the `AudioListener` and resumes its context.
+  `lifecycle.paused` for your render loop, mutes the `AudioListener` and resumes its context. It
+  wraps `listener.setMasterVolume` to follow the volume you set, because three's volume ramps
+  and `getMasterVolume()` lags. A volume you set while the game is muted applies when it
+  unmutes.
 
 Call `attach()` after `initializeAsync()`.
 

@@ -144,6 +144,71 @@ describe("Phaser helper", () => {
         f.emit("resume");
         expect(game.sound.mute).toBe(true);
     });
+
+    /**
+     * Phaser's WebAudio `sound.mute` getter reads a gain node that only changes when the
+     * AudioContext renders (never while it is suspended). `render()` stands in for that.
+     */
+    function laggingPhaserSound(initial = false) {
+        let rendered = initial;
+        let pending = initial;
+        const listeners: Array<(manager: unknown, muted: boolean) => void> = [];
+        const sound = {
+            get mute(): boolean {
+                return rendered;
+            },
+            set mute(value: boolean) {
+                pending = value;
+                listeners.forEach((l) => l(sound, value));
+            },
+            on(_event: "mute", listener: (manager: unknown, muted: boolean) => void): unknown {
+                listeners.push(listener);
+                return sound;
+            },
+        };
+        return { sound, render: (): void => void (rendered = pending), audible: (): boolean => !pending };
+    }
+
+    it("an ad started from afterAd, before the context renders, leaves the game unmuted", async () => {
+        const f = fakeSdk();
+        const { sound, render, audible } = laggingPhaserSound();
+        const game = { pause: vi.fn(), resume: vi.fn(), sound };
+        const ads = new AdRuntime({ getSdk: () => f.sdk, clock: new ManualFrameClock(), logger: quiet });
+        const lifecycle = createPhaserLifecycle(game, { ads, getSdk: () => f.sdk, logger: quiet }).attach();
+        let second: Promise<unknown> = Promise.resolve();
+        const first = lifecycle.showInterstitial("one", {
+            afterAd: () => {
+                second = lifecycle.showInterstitial("two");
+                f.adCalls[1]!.cb.beforeAd?.(); // the second ad starts before anything renders
+            },
+        });
+        f.adCalls[0]!.cb.beforeAd?.();
+        render();
+        expect(audible()).toBe(false);
+        f.adCalls[0]!.cb.afterAd?.();
+        f.adCalls[1]!.cb.afterAd?.();
+        render();
+        await Promise.all([first, second]);
+        expect(audible()).toBe(true);
+    });
+
+    it("applies the game's own mute writes, deferring an unmute until the lifecycle unmutes", () => {
+        const f = fakeSdk();
+        const { sound, render, audible } = laggingPhaserSound();
+        const game = { pause: vi.fn(), resume: vi.fn(), sound };
+        createPhaserLifecycle(game, { getSdk: () => f.sdk, logger: quiet }).attach();
+        f.emit("pause");
+        sound.mute = false; // e.g. a settings toggle while the platform has the game paused
+        render();
+        expect(audible()).toBe(false);
+        f.emit("resume");
+        expect(audible()).toBe(true);
+        sound.mute = true; // the player mutes the game
+        render();
+        f.emit("pause");
+        f.emit("resume");
+        expect(audible()).toBe(false);
+    });
 });
 
 describe("three helper", () => {
@@ -171,6 +236,61 @@ describe("three helper", () => {
         expect(changes).toEqual([true, false]);
         await done;
         expect(context.resume).toHaveBeenCalled();
+    });
+
+    /**
+     * three's `setMasterVolume` ramps (`setTargetAtTime`) and `getMasterVolume` reads the live
+     * gain, which only moves when the AudioContext renders. `render()` completes the ramp.
+     */
+    function laggingListener(initial = 1) {
+        let live = initial;
+        let target = initial;
+        const listener = {
+            context: fakeAudioContext("running"),
+            getMasterVolume: (): number => live,
+            setMasterVolume(value: number): unknown {
+                target = value;
+                return listener;
+            },
+        };
+        return { listener, render: (): void => void (live = target), target: (): number => target };
+    }
+
+    it("an ad started from afterAd, before the context renders, restores the full volume", async () => {
+        const f = fakeSdk();
+        const { listener, render, target } = laggingListener(0.8);
+        const ads = new AdRuntime({ getSdk: () => f.sdk, clock: new ManualFrameClock(), logger: quiet });
+        const lifecycle = createThreeLifecycle({ ads, getSdk: () => f.sdk, logger: quiet, listener }).attach();
+        let second: Promise<unknown> = Promise.resolve();
+        const first = lifecycle.showInterstitial("one", {
+            afterAd: () => {
+                second = lifecycle.showInterstitial("two");
+                f.adCalls[1]!.cb.beforeAd?.();
+            },
+        });
+        f.adCalls[0]!.cb.beforeAd?.();
+        render();
+        expect(target()).toBe(0);
+        f.adCalls[0]!.cb.afterAd?.();
+        f.adCalls[1]!.cb.afterAd?.();
+        render();
+        await Promise.all([first, second]);
+        expect(target()).toBe(0.8);
+        expect(listener.getMasterVolume()).toBe(0.8);
+    });
+
+    it("a volume the game sets while muted is applied when the lifecycle unmutes", () => {
+        const f = fakeSdk();
+        const { listener, target } = laggingListener(1);
+        createThreeLifecycle({ getSdk: () => f.sdk, logger: quiet, listener }).attach();
+        listener.setMasterVolume(0.5);
+        expect(target()).toBe(0.5);
+        f.emit("pause");
+        expect(target()).toBe(0);
+        listener.setMasterVolume(0.3); // e.g. a settings slider while paused
+        expect(target()).toBe(0);
+        f.emit("resume");
+        expect(target()).toBe(0.3);
     });
 });
 
