@@ -1,0 +1,225 @@
+name: YES2 JS Required CI Workflow
+
+# The required CI for @yes2sdk/js, and its only release authority: Release Please runs in this
+# same workflow run, on push to main, behind an ordinary `needs:` edge on the final gate, so it
+# only ever acts on a commit that just passed every mandatory job. Modelled on Core's and
+# Unity's required-ci.yml, at the scale of this repo.
+#
+# No bot_claude*.yaml callers, unlike Core: they call reusable workflows in the private
+# yes2games/yes2github, which a public repository cannot use, and an `@claude` issue_comment
+# trigger in a public repository would let any commenter start a run on the org's token.
+#
+# Not run here, on purpose:
+#   - The real-Core E2E project (`npm run test:e2e:core`) and `npm run check:types`. Both need
+#     the private Core source (and the E2E also the private Dashboard injector). This repo is
+#     public, and its CI must never need a credential for another repo. Maintainers run both
+#     locally; see docs/e2e.md and docs/maintaining-types.md.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A superseded pull-request run cancels; a push to main never does, because a main run may
+# carry a release.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+# Runner: Core's expression, kept so the file works in either visibility. This repository is
+# public, so GitHub-hosted minutes are free here and, with no RUNNER_HOST variable set, every
+# job runs on the named hosted image. The organization's no-hosted-runners rule covers its
+# private repositories, where minutes are billed; RUNNER_HOST is only for the self-hosted
+# fleet in that case. ubuntu-24.04, never ubuntu-latest, so the machine class cannot move
+# without a commit that says so.
+
+jobs:
+  release-config:
+    name: Release config
+    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.x"
+
+      # No install: the verifier uses node: builtins only.
+      - name: Assert the Release Please contract and version consistency
+        run: node scripts/verify-release-config.ts
+
+  verify:
+    name: Verify (Node ${{ matrix.node-version }})
+    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        # 22.x is the floor in package.json engines (native TypeScript stripping for the
+        # scripts); 24.x is the current LTS.
+        node-version: [22.x, 24.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      # Also builds the runtime and the mock (`prepare`).
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check (runtime, mock, scripts, e2e, every template)
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Build every template and verify the builds
+        run: npm run build
+
+      - name: Verify the package contents (npm pack --dry-run)
+        run: npm run verify:pack
+
+  e2e:
+    name: E2E (mock, Chromium)
+    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22.x"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The browser version comes from the pinned @playwright/test. Hosted images get the
+      # system libraries with --with-deps (apt, needs sudo); self-hosted runners provision
+      # their own image, so only the browser is downloaded there.
+      - name: Install Chromium for Playwright
+        env:
+          SELF_HOSTED: ${{ vars.RUNNER_HOST != '' }}
+        run: |
+          if [ "$SELF_HOSTED" = "true" ]; then
+            npx playwright install chromium
+          else
+            npx playwright install --with-deps chromium
+          fi
+
+      - name: Build the runtime, the mock and every template
+        run: npm run build
+
+      # mock-dev (Vite dev servers) and mock-built (production artifacts). real-core is
+      # opt-in and needs the private Core; see the note at the top of this file.
+      - name: E2E in mock mode
+        run: npm run test:e2e:mock
+
+      - name: Upload the Playwright report
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: playwright-report-${{ github.run_attempt }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7
+
+  required-ci:
+    name: YES2 JS Required CI
+    needs:
+      - release-config
+      - verify
+      - e2e
+    if: always()
+    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Assert every mandatory result is an exact success
+        env:
+          MANDATORY_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          # shellcheck disable=SC2016 # the single quotes are JavaScript, not shell expansions
+          node -e '
+            const needs = JSON.parse(process.env.MANDATORY_RESULTS);
+            const entries = Object.entries(needs);
+            if (entries.length === 0) {
+              console.error("the final gate depends on no mandatory job");
+              process.exit(1);
+            }
+            for (const [job, outcome] of entries) {
+              console.log(`${outcome.result === "success" ? "ok  " : "FAIL"} ${job}: ${outcome.result}`);
+            }
+            const bad = entries.filter(([, outcome]) => outcome.result !== "success");
+            if (bad.length > 0) {
+              console.error(`${bad.length} of ${entries.length} mandatory results are not an exact success`);
+              process.exit(1);
+            }
+            console.log(`all ${entries.length} mandatory results succeeded`);
+          '
+
+  # Release Please, only on push to main and only when the gate in this same run passed. It
+  # opens or updates the release PR (version, CHANGELOG.md, manifest) and, when that PR is the
+  # commit being pushed, creates the vX.Y.Z tag and the GitHub Release itself
+  # (skip-github-release: false; see scripts/verify-release-config.ts for why this differs
+  # from Core). Nothing is published to npm.
+  release-please:
+    name: Release Please
+    needs: [required-ci]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.required-ci.result == 'success'
+    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    timeout-minutes: 10
+    concurrency:
+      group: yes2-js-release
+      cancel-in-progress: false
+    # Used only by the GITHUB_TOKEN fallback below; the App token carries its own scopes.
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      # The secrets context is not available in an `if:`, so probe it here and pass a boolean.
+      - name: Probe for the Butler App
+        id: butler-probe
+        env:
+          HAS_APP: ${{ secrets.BUTLER_APP_ID != '' && secrets.BUTLER_APP_PRIVATE_KEY != '' }}
+        run: |
+          echo "present=$HAS_APP" >> "$GITHUB_OUTPUT"
+          if [ "$HAS_APP" != "true" ]; then
+            echo "::warning title=Release PR will not trigger CI::BUTLER_APP_ID / BUTLER_APP_PRIVATE_KEY are not available to this repository. Release Please falls back to GITHUB_TOKEN, and a pull request opened with GITHUB_TOKEN runs no pull_request workflows, so the release PR gets no required CI until someone pushes to it. Grant the Butler App secrets to this repository."
+          fi
+
+      # A pull request opened with GITHUB_TOKEN fires no pull_request event, so the release PR
+      # would face no gate. The App token exists for that reason only (as in Core and Unity).
+      - name: Mint the Butler App token
+        id: app-token
+        if: steps.butler-probe.outputs.present == 'true'
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.BUTLER_APP_ID }}
+          private-key: ${{ secrets.BUTLER_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+          permission-contents: write
+          permission-pull-requests: write
+          permission-metadata: read
+
+      - name: Open or update the release PR, tag and release a merged one
+        uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
+        with:
+          token: ${{ steps.app-token.outputs.token || secrets.GITHUB_TOKEN }}
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
