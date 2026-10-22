@@ -23,9 +23,15 @@ function targets(entry: ExportTarget): string[] {
 }
 
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
-const report = JSON.parse(
-    execFileSync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], { cwd: ROOT, encoding: "utf8" })
-) as Array<{ files: Array<{ path: string }> }>;
+// Some npm versions (10.x, Node 22) still run `prepare` here, and its log lines reach stdout
+// ahead of the JSON. Parse from the line where the JSON array starts.
+const output = execFileSync(npm, ["pack", "--dry-run", "--json", "--ignore-scripts"], { cwd: ROOT, encoding: "utf8" });
+const jsonStart = output.search(/^\[\s*$/m);
+if (jsonStart === -1) {
+    console.error(`[verify-pack] npm pack printed no JSON:\n${output}`);
+    process.exit(1);
+}
+const report = JSON.parse(output.slice(jsonStart)) as Array<{ files: Array<{ path: string }> }>;
 const files = new Set((report[0]?.files ?? []).map((f) => f.path));
 const pkg = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8")) as { exports: Record<string, ExportTarget>; types: string };
 
