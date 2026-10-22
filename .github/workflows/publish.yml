@@ -1,0 +1,80 @@
+name: YES2 JS Publish (manual)
+
+# Manual npm publish of an existing release tag. The normal path is the npm-publish job in
+# required-ci.yml, which runs when Release Please creates a release. Use this one when a
+# release was tagged by hand (e.g. v0.1.0, tagged manually because the org blocks Actions from
+# opening the release PR), or to retry a failed publish. It publishes only an existing vX.Y.Z
+# tag whose package.json version matches the tag.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to publish (vX.Y.Z)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yes2-js-release
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Check the tag format
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          if ! [[ "$TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::tag must look like vX.Y.Z, got '$TAG'"
+            exit 1
+          fi
+
+      - name: Checkout the release tag
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          ref: refs/tags/${{ inputs.tag }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "24.x"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs npm 11.5.1 or newer.
+      - name: Update npm
+        run: npm install -g npm@11.6.2
+
+      - name: Check package.json matches the tag
+        env:
+          TAG: ${{ inputs.tag }}
+        run: |
+          VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$VERSION" != "$TAG" ]; then
+            echo "::error::package.json is $VERSION but the tag is $TAG"
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify before publishing
+        run: |
+          npm run typecheck
+          npm test
+          npm run verify:pack
+
+      - name: Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public
