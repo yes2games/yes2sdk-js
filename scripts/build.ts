@@ -10,9 +10,10 @@
 
 import { build } from "esbuild";
 import { execFileSync } from "node:child_process";
-import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { addDeclarationExtensions } from "./declaration-extensions.ts";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const TSC = join(ROOT, "node_modules", "typescript", "bin", "tsc");
@@ -25,6 +26,15 @@ function coreVersion(): string {
 
 function tsc(project: string): void {
     execFileSync(process.execPath, [TSC, "-p", join(ROOT, project)], { stdio: "inherit" });
+}
+
+function fixDeclarations(dir: string): void {
+    for (const name of readdirSync(dir)) {
+        if (name.endsWith(".d.ts")) {
+            const file = join(dir, name);
+            writeFileSync(file, addDeclarationExtensions(readFileSync(file, "utf8")));
+        }
+    }
 }
 
 async function buildRuntime(): Promise<void> {
@@ -51,6 +61,7 @@ async function buildRuntime(): Promise<void> {
         logLevel: "warning",
     });
     tsc("tsconfig.runtime.json");
+    fixDeclarations(out);
 }
 
 async function buildMock(): Promise<void> {
@@ -67,6 +78,7 @@ async function buildMock(): Promise<void> {
     await build({ ...shared, entryPoints: [join(ROOT, "mock", "src", "iife.ts")], outfile: join(out, "yes2sdk-mock.js"), format: "iife", target: "es2017" });
     await build({ ...shared, entryPoints: [join(ROOT, "mock", "src", "index.ts")], outfile: join(out, "index.js"), format: "esm", target: "es2020" });
     tsc("mock/tsconfig.build.json");
+    fixDeclarations(out);
     const vanilla = join(ROOT, "templates", "vanilla-js");
     if (existsSync(vanilla)) {
         copyFileSync(join(out, "yes2sdk-mock.js"), join(vanilla, "yes2sdk-mock.js"));
@@ -80,7 +92,9 @@ async function main(): Promise<void> {
     await buildMock();
 }
 
-main().catch((error: unknown) => {
-    console.error(error);
-    process.exit(1);
-});
+if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+    main().catch((error: unknown) => {
+        console.error(error);
+        process.exit(1);
+    });
+}
