@@ -10,9 +10,9 @@
     </style>
   </head>
   <body>
-    <!-- Phaser renders into this canvas. Keep a <canvas> in the page: the dashboard's
-         screenshot tool looks for one. No SDK <script> tags: the dashboard injects them. -->
-    <canvas id="game-canvas"></canvas>
+    <!-- Phaser renders into this canvas. data-yes2-canvas marks your game canvas so the
+         dashboard captures the right one. No SDK <script> tags: the dashboard injects them. -->
+    <canvas id="game-canvas" data-yes2-canvas></canvas>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

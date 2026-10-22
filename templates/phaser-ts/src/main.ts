@@ -3,7 +3,12 @@ import { createLoadingProgressReporter, installInputGuards } from "@yes2sdk/js";
 import { createPhaserLifecycle } from "@yes2sdk/js/phaser";
 import { BootScene, GameScene } from "./scenes";
 import { loadSdk } from "./sdk";
-import { setServices } from "./services";
+import { services, setServices } from "./services";
+
+/** The WebAudio context, or null when Phaser fell back to HTML5 audio or no audio. */
+function soundContext(game: Phaser.Game): BaseAudioContext | null {
+    return (game.sound as Partial<Phaser.Sound.WebAudioSoundManager>).context ?? null;
+}
 
 async function main(): Promise<void> {
     const canvas = document.getElementById("game-canvas") as HTMLCanvasElement | null;
@@ -26,7 +31,25 @@ async function main(): Promise<void> {
             // platform's pause event, and resumes on afterAd / resume.
             preBoot: (game: Phaser.Game): void => {
                 const lifecycle = createPhaserLifecycle(game).attach();
-                setServices({ sdk, lifecycle, progress: createLoadingProgressReporter() });
+                setServices({ sdk, lifecycle, progress: createLoadingProgressReporter(), started: false, coins: 0 });
+                // Debug handle: try `__yes2Template.state()` in the browser console. The repo's E2E
+                // suite reads it too. Safe to delete.
+                Object.defineProperty(window, "__yes2Template", {
+                    configurable: true,
+                    value: {
+                        template: "phaser-ts",
+                        game,
+                        lifecycle,
+                        audioContext: (): BaseAudioContext | null => soundContext(game),
+                        state: () => ({
+                            started: services().started,
+                            paused: game.isPaused,
+                            muted: game.sound.mute,
+                            audio: soundContext(game)?.state ?? "none",
+                            coins: services().coins,
+                        }),
+                    },
+                });
             },
         },
     });

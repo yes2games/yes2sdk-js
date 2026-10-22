@@ -73,6 +73,7 @@ export class GameScene extends Phaser.Scene {
         this.infoText.setText("Press Play.");
 
         await sdk.startGameAsync(); // the menu is up and interactive: the game is playable
+        services().started = true;
     }
 
     override update(_time: number, delta: number): void {
@@ -106,6 +107,7 @@ export class GameScene extends Phaser.Scene {
 
     private updateCoins(delta: number): void {
         this.coins += delta;
+        services().coins = this.coins;
         this.coinsText.setText(`Coins: ${this.coins}`);
         services().sdk.data.setInt(COINS_KEY, this.coins);
     }
