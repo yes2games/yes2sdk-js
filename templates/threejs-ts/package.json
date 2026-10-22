@@ -1,0 +1,21 @@
+{
+  "name": "@yes2sdk/template-threejs-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "@types/three": "0.186.0",
+    "@yes2sdk/js": "file:../..",
+    "typescript": "6.0.3",
+    "vite": "8.3.5"
+  }
+}

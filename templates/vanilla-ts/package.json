@@ -1,0 +1,17 @@
+{
+  "name": "@yes2sdk/template-vanilla-ts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -p tsconfig.json && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@yes2sdk/js": "file:../..",
+    "typescript": "6.0.3",
+    "vite": "8.3.5"
+  }
+}
