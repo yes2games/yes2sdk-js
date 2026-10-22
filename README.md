@@ -23,7 +23,7 @@ This package does **not** contain the SDK. You never bundle the SDK yourself:
 | `types/yes2sdk.d.ts` | The public SDK API: the `Yes2SDK` interface, every type it uses, and the `window.Yes2SDK` / `Yes2SDK` globals. It is generated from Core, then committed. |
 | `mock/` → `@yes2sdk/js/mock` | The local-development mock. See [docs/mock.md](docs/mock.md). |
 | `templates/` | `vanilla-js` (no build step), `vanilla-ts`, `phaser-ts` and `threejs-ts`, all on Vite. |
-| `docs/` | [Getting started](docs/getting-started.md), [runtime](docs/runtime.md), [mock](docs/mock.md), [maintaining the types](docs/maintaining-types.md). |
+| `docs/` | [Getting started](docs/getting-started.md), [runtime](docs/runtime.md), [mock](docs/mock.md), [maintaining the types](docs/maintaining-types.md), [E2E tests](docs/e2e.md). |
 
 ## Quick start
 
@@ -77,10 +77,11 @@ replace the real SDK:
 - **Vite templates**: the mock is imported only under `import.meta.env.DEV`, so it is not in
   `dist/` at all. `npm run build` checks this; see `scripts/verify-builds.ts`.
 - **vanilla-js template**: the `<script src="yes2sdk-mock.js">` tag may stay in the uploaded
-  build. It runs after the injected SDK, sees it, and does nothing. You can also delete the
-  tag and the file before zipping.
+  build. The dashboard removes the tag and deletes the file when it bundles your game. Even
+  if it survived, it would run after the injected SDK, see it, and do nothing.
 
-Templates never add SDK `<script>` tags of their own.
+Templates never add SDK `<script>` tags of their own. Each marks its game canvas with
+`data-yes2-canvas`: mark your game canvas so the dashboard captures the right one.
 
 ## Repo scripts
 
@@ -90,6 +91,8 @@ Templates never add SDK `<script>` tags of their own.
 | `npm run build` | Builds the runtime, the mock and every template, then checks the template builds. |
 | `npm run typecheck` | Type-checks everything, including each template. |
 | `npm test` | Runs the Vitest suites for the runtime and the mock. |
+| `npm run test:e2e:mock` | Runs every template in headless Chromium against the mock, on the Vite dev server and as a production build. Needs `npm run build` and `npx playwright install chromium`. |
+| `npm run e2e:prepare-core` / `test:e2e:core` | Real-browser tests against the real Core SDK, injected by the real Dashboard injector. Maintainers only: needs the private Core and Dashboard sources. See [docs/e2e.md](docs/e2e.md). |
 | `npm run generate:types` / `check:types` | Regenerates the types, or fails if they are stale. Maintainers only: needs the private Core source. See [docs/maintaining-types.md](docs/maintaining-types.md). |
 
 ## License
