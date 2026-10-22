@@ -24,4 +24,21 @@ All notable changes to `@yes2sdk/js` are documented here. This project follows
   `simulate()` triggers, and settings from options or `?yes2mock=` that persist across
   reloads. It never installs over the real SDK.
 - Templates: `vanilla-js`, `vanilla-ts`, `phaser-ts` and `threejs-ts`.
-- Docs: getting started, runtime, mock, maintaining the types.
+- Docs: getting started, runtime, mock, maintaining the types, E2E tests.
+- Real-browser E2E suite (Playwright, Chromium): every template against the mock (Vite dev server
+  and production build) and, opt-in for maintainers, against the real Core SDK injected by the
+  real Dashboard injector.
+- Templates mark their game canvas with `data-yes2-canvas`, which the dashboard's screenshot
+  capture prefers. `verify-builds` checks for it.
+
+### Fixed
+
+- Phaser and three helpers: an ad started from the previous ad's `afterAd` while the
+  AudioContext was still suspended left the game muted for good. The helpers saved the game's
+  mute state by reading `sound.mute` / `getMasterVolume()`, which lag behind writes. They now
+  follow the game's own writes instead.
+- Ads: `afterAd` with no `beforeAd` and no outcome (how Core settles a blocked or failed
+  interstitial) resolved `"shown"`. It now gives `noFill` then `afterAd` and resolves `"noFill"`.
+- Packaging: published declarations used extensionless relative imports, which
+  `moduleResolution: node16/nodenext` rejects. `sideEffects` no longer marks the classic
+  scripts (`yes2-runtime.js`, the mock IIFE) as side-effect free.
