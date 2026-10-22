@@ -2,6 +2,18 @@
   "name": "@yes2sdk/js",
   "version": "0.1.0",
   "description": "Runtime helpers, type declarations, a local-dev mock and starter templates for HTML5 games on window.Yes2SDK.",
+  "keywords": [
+    "yes2sdk",
+    "html5",
+    "games",
+    "phaser",
+    "three",
+    "ads"
+  ],
+  "homepage": "https://github.com/yes2games/yes2sdk-js#readme",
+  "bugs": {
+    "url": "https://github.com/yes2games/yes2sdk-js/issues"
+  },
   "license": "MIT",
   "author": {
     "name": "Yes2Games",
@@ -14,6 +26,7 @@
   },
   "type": "module",
   "types": "./dist/index.d.ts",
+  "module": "./dist/index.js",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -49,6 +62,10 @@
     "README.md",
     "CHANGELOG.md"
   ],
+  "sideEffects": [
+    "./dist/yes2-runtime.js",
+    "./mock/dist/yes2sdk-mock.js"
+  ],
   "workspaces": [
     "templates/*"
   ],
@@ -61,9 +78,16 @@
     "test": "npm run build:lib && vitest run",
     "test:watch": "vitest",
     "verify:builds": "node scripts/verify-builds.ts",
-    "build:lib": "node scripts/build.ts"
+    "build:lib": "node scripts/build.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:mock": "playwright test --project=mock-dev --project=mock-built",
+    "e2e:prepare-core": "node scripts/prepare-real-core.ts",
+    "test:e2e:core": "playwright test --project=real-core",
+    "verify:pack": "node scripts/verify-pack.ts",
+    "verify:release-config": "node scripts/verify-release-config.ts"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.1",
     "@types/jsdom": "30.0.0",
     "@types/node": "26.6.5",
     "esbuild": "0.28.2",
@@ -73,7 +97,5 @@
   },
   "engines": {
     "node": ">=22.18.0"
-  },
-  "module": "./dist/index.js",
-  "sideEffects": false
+  }
 }
