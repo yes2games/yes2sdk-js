@@ -6,6 +6,10 @@ export interface Services {
     sdk: Yes2SDK;
     lifecycle: GameLifecycle;
     progress: LoadingProgressReporter;
+    /** Set once `startGameAsync()` has resolved. */
+    started: boolean;
+    /** Coins currently shown. */
+    coins: number;
 }
 
 let current: Services | null = null;

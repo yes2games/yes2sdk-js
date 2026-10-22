@@ -70,6 +70,26 @@ async function main(): Promise<void> {
     let coins = sdk.data.getInt(COINS_KEY, 0);
     let playing = false;
     let timeLeft = 0;
+    let started = false;
+
+    // Debug handle: try `__yes2Template.state()` in the browser console. The repo's E2E suite
+    // reads it too. Safe to delete.
+    Object.defineProperty(window, "__yes2Template", {
+        configurable: true,
+        value: {
+            template: "threejs-ts",
+            lifecycle,
+            audioContext: (): BaseAudioContext => listener.context,
+            state: () => ({
+                started,
+                playing,
+                paused: lifecycle.paused,
+                muted: listener.getMasterVolume() === 0,
+                audio: listener.context.state,
+                coins,
+            }),
+        },
+    });
     const setCoins = (value: number): void => {
         coins = value;
         coinsLabel.textContent = String(coins);
@@ -149,6 +169,7 @@ async function main(): Promise<void> {
     el<HTMLElement>("ui").hidden = false;
     status.textContent = "Press Play.";
     await sdk.startGameAsync(); // rendering and interactive: the game is playable
+    started = true;
 }
 
 main().catch((error: unknown) => {

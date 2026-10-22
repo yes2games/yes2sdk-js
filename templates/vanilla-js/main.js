@@ -46,6 +46,7 @@
     var x = 0;
     /** @type {AudioContext | null} */
     var audio = null;
+    var started = false;
 
     /** @param {string} text */
     function setStatus(text) {
@@ -128,10 +129,34 @@
             },
         }).attach();
 
+        // Debug handle: try `__yes2Template.state()` in the browser console. The repo's E2E
+        // suite reads it too. Safe to delete.
+        Object.defineProperty(window, "__yes2Template", {
+            configurable: true,
+            value: {
+                template: "vanilla-js",
+                lifecycle: lifecycle,
+                audioContext: function () {
+                    return audio;
+                },
+                state: function () {
+                    return {
+                        started: started,
+                        playing: playing,
+                        paused: paused,
+                        muted: muted,
+                        audio: audio === null ? "none" : audio.state,
+                        coins: coins,
+                    };
+                },
+            },
+        });
+
         el("loading").hidden = true;
         el("hud").hidden = false;
         requestAnimationFrame(render);
         await sdk.startGameAsync(); // only now is the game playable
+        started = true;
 
         playBtn.addEventListener("click", function () {
             playing = true;
