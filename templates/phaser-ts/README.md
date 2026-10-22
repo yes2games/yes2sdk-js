@@ -7,8 +7,8 @@ npm run build     # production build in dist/ (no mock, relative paths)
 
 `src/sdk.ts` installs the mock only under `import.meta.env.DEV`, so Vite leaves it out of
 `dist/`. In a dashboard-bundled build, the real SDK is already on the page before your code
-runs. The template adds no SDK `<script>` tags of its own, and `index.html` keeps a `<canvas>`
-for the dashboard's screenshot tool.
+runs. The template adds no SDK `<script>` tags of its own. Its `<canvas>` carries
+`data-yes2-canvas`: mark your game canvas so the dashboard captures the right one.
 
 `createPhaserLifecycle(game)` from `@yes2sdk/js/phaser` pauses the game (`game.pause()`) and mutes `game.sound` on `beforeAd` and the platform's `pause` event. It resumes on `afterAd` / `resume`, and resumes `game.sound.context` after every ad. Scenes call `lifecycle.showInterstitial()` / `showRewarded()`; `showRewarded` resolves `"viewed"` only when the reward should be granted.
 

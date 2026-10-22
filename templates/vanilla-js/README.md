@@ -13,7 +13,8 @@
   `mock/dist/yes2sdk-mock.js` (or from the `@yes2sdk/js` npm package).
 - **Types:** `// @ts-check` in `main.js` plus `jsconfig.json` give editor autocompletion and
   errors. `npm run typecheck` runs the same checks.
-- **Upload:** zip the folder's contents (`index.html` at the top of the zip). The mock
-  `<script>` tag can stay: the dashboard injects the real SDK before it, and the mock then does
-  nothing. You can also delete the tag and `yes2sdk-mock.js` before zipping. Do not add SDK
-  `<script>` tags yourself.
+- **Upload:** zip the folder's contents (`index.html` at the top of the zip). The mock can
+  stay: when the dashboard bundles your game it removes the `yes2sdk-mock.js` tag, deletes the
+  file and injects the real SDK. Do not add SDK `<script>` tags yourself.
+- **Canvas:** the `<canvas>` carries `data-yes2-canvas`: mark your game canvas so the
+  dashboard captures the right one.

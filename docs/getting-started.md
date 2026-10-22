@@ -95,7 +95,7 @@ await Yes2SDK.data.flushAsync();        // at checkpoints, to make sure it is pe
 ```
 
 Storage goes to the platform's cloud save where one exists, and to local storage
-otherwise. The mock uses `localStorage` under a `yes2sdk-mock:` prefix.
+otherwise. The mock uses `localStorage` with the SDK's own `yes2sdk_` key prefix.
 
 ## Optional features
 
@@ -132,7 +132,9 @@ try {
 3. Use **relative** URLs only (`./assets/x.js`, not `/assets/x.js`). Platforms serve games
    from a sub-path, so root-absolute URLs fail. The Vite templates set `base: "./"`.
 4. Do not add SDK `<script>` tags or files; the dashboard injects them. (The mock tag in the
-   vanilla-js template is fine; it steps aside.) Your own copy of `@yes2sdk/js`, bundled or
-   as `yes2-runtime.js`, belongs in the zip.
-5. Keep a `<canvas>` element in the page. The dashboard's screenshot tool looks for one.
+   vanilla-js template is fine: the dashboard removes it and deletes `yes2sdk-mock.js`.) Your
+   own copy of `@yes2sdk/js`, bundled or as `yes2-runtime.js`, belongs in the zip.
+5. Add `data-yes2-canvas` to your game's `<canvas>`: mark your game canvas so the dashboard
+   captures the right one. Without it, the dashboard falls back to `#unity-canvas`, then the
+   largest visible canvas.
 6. Upload the zip to the Yes2Games Dashboard.

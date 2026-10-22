@@ -5,6 +5,7 @@
  *     serve games from a sub-path, and the dashboard rejects them
  *   - the mock never reaches a production build
  *   - no copy of the real SDK is shipped (the dashboard injects it)
+ *   - the game canvas is marked with data-yes2-canvas, so the dashboard captures it
  *
  * Usage: node scripts/verify-builds.ts [distDir ...]
  * Default: every templates/<name>/dist that exists.
@@ -39,6 +40,9 @@ function verify(dist: string): string[] {
         return [`${relative(ROOT, dist)}: no index.html at the top level`];
     }
     const html = readFileSync(index, "utf8");
+    if (!/<canvas\b[^>]*\bdata-yes2-canvas\b/i.test(html)) {
+        problems.push(`${relative(ROOT, index)}: no <canvas data-yes2-canvas> (mark the game canvas for the dashboard's capture)`);
+    }
     for (const match of html.matchAll(ROOT_ABSOLUTE)) {
         problems.push(`${relative(ROOT, index)}: root-absolute URL ${match[0]}`);
     }
@@ -72,4 +76,4 @@ if (problems.length > 0) {
     console.error(problems.map((p) => `  ${p}`).join("\n"));
     process.exit(1);
 }
-console.log("[verify-builds] OK: relative paths, no mock, no bundled SDK");
+console.log("[verify-builds] OK: relative paths, no mock, no bundled SDK, marked canvas");
