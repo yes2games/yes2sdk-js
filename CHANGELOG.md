@@ -5,21 +5,7 @@ All notable changes to `@yes2sdk/js` are documented here. This project follows
 
 ## 0.1.0 (2026-10-22)
 
-
-### Features
-
-* scaffold yes2sdk-js (types, runtime, mock, templates) ([96968e9](https://github.com/yes2games/yes2sdk-js/commit/96968e9622a84300d8f7e94e93679e369ec4437c))
-* **templates:** mark the game canvas with data-yes2-canvas and add a debug handle ([0761002](https://github.com/yes2games/yes2sdk-js/commit/0761002c5c0044a7eb63aa39b2439cc87928ca00))
-
-
-### Bug Fixes
-
-* **ci:** parse npm pack JSON past prepare output on npm 10 ([4e862b0](https://github.com/yes2games/yes2sdk-js/commit/4e862b053cc2f95c9b2ab031b9939122815327d9))
-* **package:** make declarations resolve under nodenext and check the tarball ([9fb6b8c](https://github.com/yes2games/yes2sdk-js/commit/9fb6b8cac70e7e36b5a91ac53440347c9d441404))
-* **release:** start at 0.1.0 and keep breaking changes on minor before 1.0 ([be6175a](https://github.com/yes2games/yes2sdk-js/commit/be6175ad1c20e1696bc83ce69ba53439ab8f7769))
-* **runtime:** report never-shown ads as noFill and stop engine helpers sticking muted ([d2213d0](https://github.com/yes2games/yes2sdk-js/commit/d2213d038225bdd36f323e0eeb85f70ad66228f4))
-
-## [Unreleased]
+First release.
 
 ### Added
 
@@ -46,15 +32,3 @@ All notable changes to `@yes2sdk/js` are documented here. This project follows
   real Dashboard injector.
 - Templates mark their game canvas with `data-yes2-canvas`, which the dashboard's screenshot
   capture prefers. `verify-builds` checks for it.
-
-### Fixed
-
-- Phaser and three helpers: an ad started from the previous ad's `afterAd` while the
-  AudioContext was still suspended left the game muted for good. The helpers saved the game's
-  mute state by reading `sound.mute` / `getMasterVolume()`, which lag behind writes. They now
-  follow the game's own writes instead.
-- Ads: `afterAd` with no `beforeAd` and no outcome (how Core settles a blocked or failed
-  interstitial) resolved `"shown"`. It now gives `noFill` then `afterAd` and resolves `"noFill"`.
-- Packaging: published declarations used extensionless relative imports, which
-  `moduleResolution: node16/nodenext` rejects. `sideEffects` no longer marks the classic
-  scripts (`yes2-runtime.js`, the mock IIFE) as side-effect free.
