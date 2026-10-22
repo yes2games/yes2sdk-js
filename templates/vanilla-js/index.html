@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Yes2SDK vanilla-js template</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="game" width="640" height="360"></canvas>
+    <div id="loading">Loading… <span id="progress">0</span>%</div>
+    <div id="hud" hidden>
+      <span>Coins: <strong id="coins">0</strong></span>
+      <button id="play">Play level</button>
+      <button id="finish" disabled>Finish level (interstitial)</button>
+      <button id="reward">Watch ad: +10 coins (rewarded)</button>
+    </div>
+    <p id="status" role="status"></p>
+
+    <!--
+      Local development only: the Yes2SDK mock defines window.Yes2SDK so the game
+      runs on your machine. When the Yes2Games Dashboard bundles this build it
+      injects the real SDK BEFORE this tag; the mock then sees window.Yes2SDK /
+      window.__yes2sdkConfig and does nothing. Leaving it in is harmless, but you
+      can delete this tag and yes2sdk-mock.js before zipping your upload.
+    -->
+    <script src="yes2sdk-mock.js"></script>
+    <!-- The @yes2sdk/js runtime layer (window.Yes2Runtime): ad latch + watchdog, pause/mute
+         helpers. It is part of YOUR game and ships in your zip. It is not the SDK. -->
+    <script src="yes2-runtime.js"></script>
+    <script src="main.js"></script>
+  </body>
+</html>

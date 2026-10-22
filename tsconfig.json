@@ -1,0 +1,18 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": [
+      "node"
+    ]
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "src/**/*.ts",
+    "test/**/*.ts",
+    "mock/src/**/*.ts",
+    "mock/test/**/*.ts",
+    "mock/build.ts",
+    "scripts/**/*.ts",
+    "vitest.config.ts"
+  ]
+}

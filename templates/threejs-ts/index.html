@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>Yes2SDK three.js template</title>
+    <style>
+      html, body { margin: 0; height: 100%; background: #000; overflow: hidden; color: #eee; font: 16px/1.4 system-ui, sans-serif; }
+      #game-canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+      #ui { position: fixed; top: 12px; left: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+      #ui[hidden] { display: none; }
+      #status { position: fixed; bottom: 12px; left: 0; right: 0; text-align: center; }
+      button { font: inherit; padding: 6px 12px; }
+    </style>
+  </head>
+  <body>
+    <!-- three renders into this canvas. Keep a <canvas> in the page: the dashboard's
+         screenshot tool looks for one. No SDK <script> tags: the dashboard injects them. -->
+    <canvas id="game-canvas"></canvas>
+    <div id="ui" hidden>
+      <span>Coins: <strong id="coins">0</strong></span>
+      <button id="play">Play level</button>
+      <button id="reward">+10 coins (rewarded ad)</button>
+    </div>
+    <p id="status" role="status">Loading… 0%</p>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

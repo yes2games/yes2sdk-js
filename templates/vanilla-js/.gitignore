@@ -1,0 +1,3 @@
+# Copied here by `npm run build:lib` at the repo root (also on npm install).
+yes2sdk-mock.js
+yes2-runtime.js

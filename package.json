@@ -1,0 +1,79 @@
+{
+  "name": "@yes2sdk/js",
+  "version": "0.1.0",
+  "description": "Runtime helpers, type declarations, a local-dev mock and starter templates for HTML5 games on window.Yes2SDK.",
+  "license": "MIT",
+  "author": {
+    "name": "Yes2Games",
+    "email": "info@yes2games.com",
+    "url": "https://yes2games.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yes2games/yes2sdk-js.git"
+  },
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./phaser": {
+      "types": "./dist/phaser.d.ts",
+      "import": "./dist/phaser.js"
+    },
+    "./three": {
+      "types": "./dist/three.d.ts",
+      "import": "./dist/three.js"
+    },
+    "./global": {
+      "types": "./dist/global.d.ts",
+      "default": "./dist/yes2-runtime.js"
+    },
+    "./mock": {
+      "types": "./mock/dist/index.d.ts",
+      "import": "./mock/dist/index.js"
+    },
+    "./mock/iife": "./mock/dist/yes2sdk-mock.js",
+    "./types": {
+      "types": "./types/yes2sdk.d.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "types",
+    "mock/dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "workspaces": [
+    "templates/*"
+  ],
+  "scripts": {
+    "prepare": "npm run build:lib",
+    "generate:types": "node scripts/generate-types.ts",
+    "check:types": "node scripts/generate-types.ts --check",
+    "build": "npm run build:lib && npm run build --workspaces --if-present && npm run verify:builds",
+    "typecheck": "npm run build:lib && tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
+    "test": "npm run build:lib && vitest run",
+    "test:watch": "vitest",
+    "verify:builds": "node scripts/verify-builds.ts",
+    "build:lib": "node scripts/build.ts"
+  },
+  "devDependencies": {
+    "@types/jsdom": "30.0.0",
+    "@types/node": "26.6.5",
+    "esbuild": "0.28.2",
+    "jsdom": "30.1.3",
+    "typescript": "6.0.3",
+    "vitest": "5.0.5"
+  },
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "module": "./dist/index.js",
+  "sideEffects": false
+}
