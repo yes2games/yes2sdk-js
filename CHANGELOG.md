@@ -3,6 +3,16 @@
 All notable changes to `@yes2games/js` are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## 0.1.1 (2026-10-23)
+
+### Changed
+
+- Published as `@yes2games/js` (the name `@yes2sdk/js` was never published).
+- README rewritten as the landing page of the developer guide at
+  https://developer.yes2games.com/docs/javascript, with links to the Phaser, three.js, mock,
+  ad runtime and Vite upload guides.
+- Releases publish through npm trusted publishing with provenance; no npm token is stored.
+
 ## 0.1.0 (2026-10-22)
 
 First release.

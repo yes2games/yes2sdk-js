@@ -1,6 +1,6 @@
 {
   "name": "@yes2games/js",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Runtime helpers, type declarations, a local-dev mock and starter templates for HTML5 games on window.Yes2SDK.",
   "keywords": [
     "yes2sdk",
