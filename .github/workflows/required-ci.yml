@@ -228,47 +228,21 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  # Publishes @yes2games/js to npm when Release Please has just created a release, from the
-  # tagged commit, with provenance. Auth prefers npm trusted publishing (OIDC, no stored
-  # secret; configure it on npmjs.com for this repo and workflow file). Trusted publishing
-  # can only be configured once the package exists, so the very first publish uses the
-  # NPM_TOKEN secret when it is set. Remove NPM_TOKEN after trusted publishing is configured.
+  # Hands a freshly created release to publish.yml. npm allows one trusted publisher per
+  # package and it is publish.yml, so that is the only workflow that ever runs `npm publish`.
+  # A workflow_dispatch sent with GITHUB_TOKEN does start a run (the one exception to
+  # GITHUB_TOKEN events not triggering workflows), so no extra secret is needed.
   npm-publish:
     name: Publish to npm
     needs: [release-please]
     if: needs.release-please.outputs.release_created == 'true'
     runs-on: ubuntu-24.04
-    timeout-minutes: 15
-    environment: npm
+    timeout-minutes: 5
     permissions:
-      contents: read
-      id-token: write
+      actions: write
     steps:
-      - name: Checkout the release tag
-        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
-        with:
-          ref: ${{ needs.release-please.outputs.tag_name }}
-
-      - name: Setup Node.js
-        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        with:
-          node-version: "24.x"
-          registry-url: "https://registry.npmjs.org"
-
-      # Trusted publishing needs npm 11.5.1 or newer.
-      - name: Update npm
-        run: npm install -g npm@11.6.2
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Verify before publishing
-        run: |
-          npm run typecheck
-          npm test
-          npm run verify:pack
-
-      - name: Publish
+      - name: Dispatch publish.yml for the new tag
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ needs.release-please.outputs.tag_name }}
+        run: gh workflow run publish.yml --repo "$GITHUB_REPOSITORY" --ref main -f tag="$TAG"
