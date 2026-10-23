@@ -3,6 +3,13 @@
 All notable changes to `@yes2games/js` are documented here. This project follows
 [Semantic Versioning](https://semver.org/).
 
+## [0.1.1](https://github.com/yes2games/yes2sdk-js/compare/v0.1.0...v0.1.1) (2026-10-23)
+
+
+### Documentation
+
+* make the README the developer-site landing page ([2aae23e](https://github.com/yes2games/yes2sdk-js/commit/2aae23e7d89a55c43f9b9adb8fbee76740b5c5fb))
+
 ## 0.1.0 (2026-10-22)
 
 First release.
