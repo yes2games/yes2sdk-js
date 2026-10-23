@@ -1,10 +1,10 @@
-name: YES2 JS Publish (manual)
+name: YES2 JS Publish
 
-# Manual npm publish of an existing release tag. The normal path is the npm-publish job in
-# required-ci.yml, which runs when Release Please creates a release. Use this one when a
-# release was tagged by hand (e.g. v0.1.0, tagged manually because the org blocks Actions from
-# opening the release PR), or to retry a failed publish. It publishes only an existing vX.Y.Z
-# tag whose package.json version matches the tag.
+# The only workflow that publishes @yes2games/js to npm. npm trusted publishing (OIDC) is
+# configured for this file and the `npm` environment, so no npm token is stored anywhere.
+# required-ci.yml dispatches it when Release Please creates a release; run it by hand to
+# publish a tag made manually or to retry a failed publish. It publishes only an existing
+# vX.Y.Z tag whose package.json version matches the tag.
 
 on:
   workflow_dispatch:
@@ -74,7 +74,7 @@ jobs:
           npm test
           npm run verify:pack
 
+      # Trusted publishing: npm exchanges the job's OIDC token for a short-lived publish
+      # credential. Provenance is generated automatically.
       - name: Publish
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --provenance --access public
+        run: npm publish --access public
