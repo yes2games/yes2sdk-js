@@ -30,16 +30,14 @@ permissions:
   contents: read
 
 # Runner: Core's expression, kept so the file works in either visibility. This repository is
-# public, so GitHub-hosted minutes are free here and, with no RUNNER_HOST variable set, every
-# job runs on the named hosted image. The organization's no-hosted-runners rule covers its
-# private repositories, where minutes are billed; RUNNER_HOST is only for the self-hosted
-# fleet in that case. ubuntu-24.04, never ubuntu-latest, so the machine class cannot move
-# without a commit that says so.
+# public, so GitHub-hosted minutes are free here and, with no RUNNER_LIGHT variable set, every
+# job runs on the named hosted image. ubuntu-24.04, never ubuntu-latest, so the machine class
+# cannot move without a commit that says so.
 
 jobs:
   release-config:
     name: Release config
-    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    runs-on: ${{ fromJson(vars.RUNNER_LIGHT || '["ubuntu-24.04"]') }}
     timeout-minutes: 5
     steps:
       - name: Checkout repository
@@ -56,7 +54,7 @@ jobs:
 
   verify:
     name: Verify (Node ${{ matrix.node-version }})
-    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    runs-on: ${{ fromJson(vars.RUNNER_LIGHT || '["ubuntu-24.04"]') }}
     timeout-minutes: 15
     strategy:
       fail-fast: false
@@ -92,7 +90,7 @@ jobs:
 
   e2e:
     name: E2E (mock, Chromium)
-    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    runs-on: ${{ fromJson(vars.RUNNER_LIGHT || '["ubuntu-24.04"]') }}
     timeout-minutes: 20
     steps:
       - name: Checkout repository
@@ -107,18 +105,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # The browser version comes from the pinned @playwright/test. Hosted images get the
-      # system libraries with --with-deps (apt, needs sudo); self-hosted runners provision
-      # their own image, so only the browser is downloaded there.
+      # The browser version comes from the pinned @playwright/test.
       - name: Install Chromium for Playwright
-        env:
-          SELF_HOSTED: ${{ vars.RUNNER_HOST != '' }}
-        run: |
-          if [ "$SELF_HOSTED" = "true" ]; then
-            npx playwright install chromium
-          else
-            npx playwright install --with-deps chromium
-          fi
+        run: npx playwright install --with-deps chromium
 
       - name: Build the runtime, the mock and every template
         run: npm run build
@@ -145,7 +134,7 @@ jobs:
       - verify
       - e2e
     if: always()
-    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    runs-on: ${{ fromJson(vars.RUNNER_LIGHT || '["ubuntu-24.04"]') }}
     timeout-minutes: 5
     permissions: {}
     steps:
@@ -181,7 +170,7 @@ jobs:
     name: Release Please
     needs: [required-ci]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.required-ci.result == 'success'
-    runs-on: ${{ fromJson(vars.RUNNER_HOST && format('["self-hosted","{0}","light"]', vars.RUNNER_HOST) || '["ubuntu-24.04"]') }}
+    runs-on: ${{ fromJson(vars.RUNNER_LIGHT_TRUSTED || '["ubuntu-24.04"]') }}
     timeout-minutes: 10
     concurrency:
       group: yes2-js-release
