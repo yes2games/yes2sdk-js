@@ -1,7 +1,7 @@
 /**
  * Yes2SDK public type declarations.
  *
- * Generated from Yes2SDK Core v2.12.0 by scripts/generate-types.ts.
+ * Generated from Yes2SDK Core v2.13.0 by scripts/generate-types.ts.
  * DO NOT EDIT BY HAND: run `npm run generate:types` with Core available.
  */
 
@@ -467,9 +467,11 @@ export interface SessionAPI {
      * Yes2SDK.on("audioEnabledChange", ({ enabled }) => game.setMute(!enabled));
      * ```
      *
-     * On platforms without a native audio-enabled signal (Poki, CrazyGames, Yandex,
-     * GameDistribution), this returns true. Before initialization it returns true to avoid muting
-     * games during early initialization.
+     * YouTube Playables (`system.isAudioEnabled`) and CrazyGames (`game.settings.muteAudio`) report
+     * real state; CrazyGames also requires its mute to override in-game audio settings. On
+     * platforms without a native audio-enabled signal (Poki, Yandex, GameDistribution), this
+     * returns true. Before initialization it returns true to avoid muting games during early
+     * initialization.
      *
      * @returns True if audio is enabled.
      */
@@ -2098,8 +2100,8 @@ export interface SDKEvents {
     resume: void;
     /**
      * Fired when the platform's audio-enabled state changes (user muted/unmuted via platform UI).
-     * Required by YouTube Playables. The game MUST update its audio state to match. Only emitted on
-     * platforms that expose a native signal.
+     * Required by YouTube Playables and CrazyGames (`game.settings.muteAudio`). The game MUST
+     * update its audio state to match. Only emitted on platforms that expose a native signal.
      */
     audioEnabledChange: { enabled: boolean };
     /**
